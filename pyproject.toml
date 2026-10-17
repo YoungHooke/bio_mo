@@ -1,0 +1,17 @@
+[project]
+name = "bio-mo"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Alex",email = "yong.hooke@gmail.com"}
+]
+requires-python = ">=3.12"
+dependencies = [
+    "numpy (>=2.5.4,<3.0.0)",
+    "scipy (>=1.18.1,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
