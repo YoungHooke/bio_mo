@@ -3,25 +3,25 @@ from scipy.optimize import minimize
 import time
 
 # ==========================================
-# 1. АНАЛИТИЧЕСКИЕ ФУНКЦИИ СРЕДЫ (Слайд 4)
+# 1. АНАЛИТИЧЕСКИЕ ФУНКЦИИ СРЕДЫ
 # ==========================================
 
 def E_func(x, eps1, C1, sigma1):
-    #"""Пища: сигмоидальный спад с глубиной"""
+    #Пища: сигмоидальный спад с глубиной
     # x <= 0 (глубина в метрах со знаком минус)
     return sigma1 * (np.tanh(eps1 * x + C1) + 1.0)
 
 def Sx_func(x, eps2, C2, sigma2):
-    #"""Хищник по глубине: концентрация в верхних освещенных слоях"""
+    #Хищник по глубине: концентрация в верхних освещенных слоях
     return sigma2 * (np.tanh(eps2 * x + C2) + 1.0)
 
 def St_func(t):
-    #"""Суточный ход хищника: максимум днем (t=0.5), минимум ночью (t=0, t=1)"""
+    #Суточный ход хищника: максимум днем (t=0.5), минимум ночью (t=0, t=1)
     # -cos(2*pi*t) дает минимум в полночь и максимум в полдень
     return -np.cos(2.0 * np.pi * t) + 1.0
 
 def G_func(x, eps3, C0, xi):
-    #"""Стресс (температура + H2S): минимум на оптимуме ХПС (-C0), рост вверх и вниз"""
+    #Стресс (температура + H2S): минимум на оптимуме ХПС (-C0), рост вверх и вниз
     arg = np.clip(eps3 * (x + C0), -15.0, 15.0)  # защита от переполнения exp
     return xi * np.cosh(arg)
 
@@ -34,10 +34,8 @@ T_STEPS = 60
 t_grid = np.linspace(0.0, 1.0, T_STEPS)
 st_grid = St_func(t_grid)
 
-def evaluate_fitness(v, env_params, weights):
-    """
-    Вычисляет J(A, B) для стратегии v = (A, B)
-    """
+def compute_fitness(v, env_params, weights):
+    # Вычисляет J(A, B) для стратегии v = (A, B)
     A, B = v[0], v[1]
     
     # Жесткий штраф за выход за пределы водного столба:
@@ -74,9 +72,7 @@ def evaluate_fitness(v, env_params, weights):
 # ==========================================
 
 def generate_dataset(num_samples=1000, noise_level=0.05, migration_threshold=20.0):
-    """
-    Генерирует матрицу X (num_samples, 84) и метки Y (num_samples)
-    """
+    # Генерирует матрицу X (num_samples, 84) и метки Y (num_samples)
     depth_sensors = np.linspace(0.0, -140.0, 20)  # 20 горизонтов глубины
     time_sensors  = np.linspace(0.0, 1.0, 20)      # 20 отсчетов времени
     
@@ -136,8 +132,8 @@ def generate_dataset(num_samples=1000, noise_level=0.05, migration_threshold=20.
         ])
         
         # 4. МОДЕЛЬ ОТБОРА: поиск оптимальной стратегии (A*, B*)
-        def loss_to_minimize(v):
-            return -evaluate_fitness(v, env_params, weights)
+        def loss_to_minimize(v, env_params, weights):
+            return -compute_fitness(v, env_params, weights)
         
         # Начальная точка поиска: глубина оптимума ХПС, амплитуда 15 м
         init_guess = [-C0, 15.0]
@@ -145,6 +141,7 @@ def generate_dataset(num_samples=1000, noise_level=0.05, migration_threshold=20.
         opt_res = minimize(
             loss_to_minimize, 
             x0=init_guess, 
+            args=(env_params, weights),
             method='Nelder-Mead',
             options={'maxiter': 150, 'xatol': 0.5, 'fatol': 0.01}
         )
