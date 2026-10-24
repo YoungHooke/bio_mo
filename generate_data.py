@@ -94,6 +94,8 @@ def generate_dataset(num_samples=1000, noise_level=0.05, migration_threshold=20.
         # 2. Разыгрываем параметры гидрологической структуры моря
         # Слой оптимума ХПС (холодного промежуточного слоя): 60-80 м
         C0 = np.random.uniform(60.0, 80.0)
+
+        # можно задать значения как массив фиксированных чисел. Что лучше??
         
         env_params = {
             'eps1': np.random.uniform(0.04, 0.07),
@@ -116,6 +118,9 @@ def generate_dataset(num_samples=1000, noise_level=0.05, migration_threshold=20.
         G_discrete  = G_func(depth_sensors, env_params['eps3'], env_params['C0'], env_params['xi'])
         
         # Наложение белого шума датчиков (5-10%)
+
+        # как будто не обязателен
+
         if noise_level > 0.0:
             E_discrete  *= (1.0 + np.random.uniform(-noise_level, noise_level, size=20))
             Sx_discrete *= (1.0 + np.random.uniform(-noise_level, noise_level, size=20))
